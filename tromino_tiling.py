@@ -32,25 +32,13 @@ def place(board, color, x, y, type):
         board[x][y-1] = color
 
 def search4exc(board):
+    max_i = len(board)-1
     cords = [-1, -1]
-    for i in range(len(board)):
-        for j in range(len(board[i])):
+    for i in [0, max_i]:
+        for j in [0, max_i]:
             if (board[i][j]!='X'):
                 cords[0], cords[1] = [i, j]   
     return cords
-
-def copy_part(board, topl, botr):
-    #extracting coordinates of the top-left and bottom-right corners
-    top_left_row, top_left_col = topl
-    bottom_right_row, bottom_right_col = botr
-    
-    #copying the portion of the board we want to copy
-    part = []
-    for i in range(top_left_row, bottom_right_row + 1):
-        part_row = board[i][top_left_col:bottom_right_col + 1]
-        part.append(part_row)
-    
-    return part
 
 def paste_part(board, topl, board_part):
     #extracting coordinates of the top-left corner for both destination and part boards
@@ -71,8 +59,8 @@ def divide(board):
     n = len(board)
     half_n = n // 2
     
-    q1 = [row[:half_n] for row in board[:half_n]]
-    q2 = [row[half_n:] for row in board[:half_n]]
+    q1 = [row[half_n:] for row in board[:half_n]]
+    q2 = [row[:half_n] for row in board[:half_n]]
     q3 = [row[:half_n] for row in board[half_n:]]
     q4 = [row[half_n:] for row in board[half_n:]]
     
@@ -81,24 +69,48 @@ def divide(board):
 def tiling(board):
     n = len(board)/2
     if (n==1):
-        res = search4exc(board)
-        if (res[0] == -1):
-            place(board, 'G', 1, 0, 3)
+        place(board, 'G', 1, 0, 3)
     elif (n==2):
-        place(board, 'G', 1, 1, 2)
-        place(board, 'B', 0, 0, 2)
-        place(board, 'B', 2, 2, 2)
-        place(board, 'R', 0, 3, 1)
-        place(board, 'R', 3, 0, 3)
+        corner = search4exc(board)
+        if (corner == [-1, -1]): # if there is no different color square place as intented
+            place(board, 'G', 1, 1, 2)
+            place(board, 'B', 0, 0, 2)
+            place(board, 'B', 2, 2, 2)
+            place(board, 'R', 0, 3, 1)
+            place(board, 'R', 3, 0, 3)
+        elif (corner[0]==corner[1]): #if there is a square the main diagonal its the bottom right
+            size = len(board)
+
+            dupl = [['G' for i in range(size)] for j in range(size)]
+            place(dupl, 'G', 1, 1, 2)
+            place(dupl, 'B', 0, 0, 2)
+            place(dupl, 'B', 2, 2, 2)
+            place(dupl, 'R', 0, 3, 1)
+            place(dupl, 'R', 3, 0, 3)
+
+            #matrix transpotion relative to the second diagonal
+            flipped_sec = [[0] * size for _ in range(size)]
+            for i in range(size):
+                for j in range(size):
+                    flipped_sec[i][j] = dupl[size - 1 - j][size - 1 - i]
+
+            #placing the transposed 2d list
+            paste_part(board, [0, 0], flipped_sec)
+
+            
+
     else:
+        btr = len(board)//2 #the bottom right corner coordinates of the center square - center bottom right
+        place(board, 'G', btr, btr, 4)
         q = divide(board)
         qf = tiling(q[1]) #quarter filled
         paste_part(board, [0, 0], qf) #placing the filled quarter
-        btr = len(board)//2 #the bottom right corner coordinates of the center square - center bottom right
-        place(board, 'G', btr, btr, 4)
+        half_n = len(board)//2
+        qf = tiling(q[3])
+        paste_part(board, [btr, btr], qf)
+
     return board
 
     
-
 solution = tiling(board)
 board_printer(solution)
