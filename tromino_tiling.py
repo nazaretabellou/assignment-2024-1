@@ -78,7 +78,7 @@ def tiling(board):
             place(board, 'B', 2, 2, 2)
             place(board, 'R', 0, 3, 1)
             place(board, 'R', 3, 0, 3)
-        elif (corner[0]==corner[1]): #if there is a square the main diagonal its the bottom right
+        elif (corner[0]==corner[1]): #if there is a square in the main diagonal its the bottom right
             size = len(board)
 
             dupl = [['G' for i in range(size)] for j in range(size)]
@@ -96,6 +96,30 @@ def tiling(board):
 
             #placing the transposed 2d list
             paste_part(board, [0, 0], flipped_sec)
+        elif (corner[0]>corner[1]): #if there is a square in the top right corner
+            place(board, 'G', 1, 2, 1)
+            place(board, 'R', 0, 3, 1)
+            place(board, 'R', 2, 1, 1)
+            place(board, 'B', 0, 0, 2)
+            place(board, 'B', 3, 3, 4)
+        elif (corner[0]<corner[1]):
+            size = len(board)
+
+            dupl = [['G' for i in range(size)] for j in range(size)]
+            place(dupl, 'G', 1, 2, 1)
+            place(dupl, 'R', 0, 3, 1)
+            place(dupl, 'R', 2, 1, 1)
+            place(dupl, 'B', 0, 0, 2)
+            place(dupl, 'B', 3, 3, 4)
+
+            #matrix transpotion relative to the second diagonal
+            flipped_sec = [[0] * size for _ in range(size)]
+            for i in range(size):
+                for j in range(size):
+                    flipped_sec[i][j] = dupl[j][i]
+
+            #placing the transposed 2d list
+            paste_part(board, [0, 0], flipped_sec)
 
             
 
@@ -108,6 +132,10 @@ def tiling(board):
         half_n = len(board)//2
         qf = tiling(q[3])
         paste_part(board, [btr, btr], qf)
+        qf = tiling(q[0])
+        paste_part(board, [0, half_n], qf)
+        qf = tiling(q[2])
+        paste_part(board, [half_n, 0], qf)
 
     return board
 
