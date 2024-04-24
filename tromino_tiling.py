@@ -72,7 +72,7 @@ def tiling(board):
         place(board, 'G', 1, 0, 3)
     elif (n==2):
         corner = search4exc(board)
-        if (corner == [-1, -1]): # if there is no different color square place as intented
+        if (corner == [-1, -1] or (corner[0]==corner[1] and corner[0]==(len(board)-1))): # if there is no different color square place as intented or if there is a square at the bottom right corner
             place(board, 'G', 1, 1, 2)
             place(board, 'B', 0, 0, 2)
             place(board, 'B', 2, 2, 2)
@@ -120,25 +120,35 @@ def tiling(board):
 
             #placing the transposed 2d list
             paste_part(board, [0, 0], flipped_sec)
-
-            
-
     else:
+        
+        corner = search4exc(board)
         btr = len(board)//2 #the bottom right corner coordinates of the center square - center bottom right
-        place(board, 'G', btr, btr, 4)
+        if (corner == [-1, -1]): # if there is no different color square place as intented
+            place(board, 'G', btr, btr, 4)
+        elif (corner[0]>corner[1]): #if there is a square in the top right corner
+            place(board, 'G', btr-1, btr, 1)
+        elif (corner[0]==corner[1] and corner[0]==(len(board)-1)): #if there is a square at the bottom right corner
+            place(board, 'G', btr-1, btr-1, 2)
+        elif (corner[0]<corner[1]): #if the square is at the bottom left corner
+            place(board, 'G', btr, btr-1, 3)
+        elif (corner[0]==corner[1]): #if there is a square in top left corner
+            place(board, 'G', btr, btr, 4)
+
         q = divide(board)
         qf = tiling(q[1]) #quarter filled
         paste_part(board, [0, 0], qf) #placing the filled quarter
+        ############################################################
         half_n = len(board)//2
-        qf = tiling(q[3])
-        paste_part(board, [btr, btr], qf)
         qf = tiling(q[0])
         paste_part(board, [0, half_n], qf)
         qf = tiling(q[2])
         paste_part(board, [half_n, 0], qf)
+        qf = tiling(q[3])
+        paste_part(board, [btr, btr], qf)
 
     return board
-
     
 solution = tiling(board)
+print()
 board_printer(solution)
